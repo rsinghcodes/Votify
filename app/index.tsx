@@ -1,28 +1,36 @@
+import { supabase } from '@/lib/supabase';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Link, Stack } from 'expo-router';
-import { FlatList, StyleSheet, Text } from 'react-native';
-
-const polls = [
-  { id: 1, question: 'President Trump Job Approval' },
-  { id: 2, question: 'World' },
-  { id: 3, question: 'Jai' },
-];
+import { Link, router, Stack } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, StyleSheet, Text } from 'react-native';
 
 export default function HomeScreen() {
+  const [polls, setPolls] = useState([]);
+
+  useEffect(() => {
+    const fetchPolls = async () => {
+      let { data, error } = await supabase.from('polls').select('*');
+      if (error) {
+        Alert.alert('Error fetching polls...');
+      }
+      setPolls(polls);
+    };
+
+    fetchPolls();
+  }, []);
+
   return (
     <>
       <Stack.Screen
         options={{
           title: 'Polls',
           headerRight: () => (
-            <Link href={'/polls/new'}>
-              <AntDesign name="plus" size={20} color="gray" />
-            </Link>
-          ),
-          headerLeft: () => (
-            <Link href={'/profile'}>
-              <AntDesign name="user" size={20} color="gray" />
-            </Link>
+            <AntDesign
+              onPress={() => router.push('/polls/new')}
+              name="plus"
+              size={20}
+              color="gray"
+            />
           ),
         }}
       />
