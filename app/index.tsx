@@ -13,7 +13,7 @@ export default function HomeScreen() {
       if (error) {
         Alert.alert('Error fetching polls...');
       }
-      setPolls(polls);
+      setPolls(data);
     };
 
     fetchPolls();
@@ -28,6 +28,14 @@ export default function HomeScreen() {
             <AntDesign
               onPress={() => router.push('/polls/new')}
               name="plus"
+              size={20}
+              color="gray"
+            />
+          ),
+          headerLeft: () => (
+            <AntDesign
+              onPress={() => router.push('/profile')}
+              name="user"
               size={20}
               color="gray"
             />
