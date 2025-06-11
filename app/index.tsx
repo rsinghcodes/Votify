@@ -1,11 +1,12 @@
 import { supabase } from '@/lib/supabase';
+import { Poll } from '@/types/db';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Link, router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text } from 'react-native';
 
 export default function HomeScreen() {
-  const [polls, setPolls] = useState([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
 
   useEffect(() => {
     const fetchPolls = async () => {

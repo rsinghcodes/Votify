@@ -1,16 +1,34 @@
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/providers/AuthProvider';
+import { Poll } from '@/types/db';
 import Feather from '@expo/vector-icons/Feather';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
-
-const poll = {
-  question: 'React Native or Flutter?',
-  options: ['React Native', 'Flutter', 'SwiftUI'],
-};
+import { useEffect, useState } from 'react';
+import { Alert, Button, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function PollDetails() {
+  const [poll, setPoll] = useState<Poll>({});
   const [selected, setSelected] = useState('React Native');
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchPolls = async () => {
+      let { data, error } = await supabase
+        .from('polls')
+        .select('*')
+        .eq('id', Number.parseInt(id))
+        .single();
+      if (error) {
+        Alert.alert('Error fetching data');
+      }
+
+      setPoll(data);
+    };
+
+    fetchPolls();
+  }, []);
 
   const vote = () => {
     console.warn('Voted: ', selected);
@@ -19,9 +37,9 @@ export default function PollDetails() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Poll voting' }} />
-      <Text style={styles.question}>{poll.question}</Text>
+      <Text style={styles.question}>{poll?.question}</Text>
       <View style={{ gap: 5 }}>
-        {poll.options.map((option, idx) => (
+        {poll?.options?.map((option, idx) => (
           <Pressable
             onPress={() => setSelected(option)}
             style={styles.optionConatiner}
