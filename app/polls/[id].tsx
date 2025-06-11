@@ -1,15 +1,24 @@
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
-import { Poll } from '@/types/db';
+import { Poll, Vote } from '@/types/db';
 import Feather from '@expo/vector-icons/Feather';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Button, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Button,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 export default function PollDetails() {
-  const [poll, setPoll] = useState<Poll>({});
+  const [poll, setPoll] = useState<Poll>();
   const [selected, setSelected] = useState('React Native');
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [userVote, setUserVote] = useState<Vote>();
 
   const { user } = useAuth();
 
@@ -27,12 +36,55 @@ export default function PollDetails() {
       setPoll(data);
     };
 
+    const fetchUserVote = async () => {
+      if (!user) {
+        return;
+      }
+      let { data, error } = await supabase
+        .from('votes')
+        .select('*')
+        .eq('poll_id', Number.parseInt(id))
+        .eq('user_id', user.id)
+        .limit(1)
+        .single();
+
+      setUserVote(data);
+      if (data) {
+        setSelected(data.option);
+      }
+    };
+
     fetchPolls();
+    fetchUserVote();
   }, []);
 
-  const vote = () => {
-    console.warn('Voted: ', selected);
+  const vote = async () => {
+    const newVote = {
+      option: selected,
+      poll_id: poll?.id,
+      user_id: user?.id,
+    };
+    if (userVote) {
+      newVote.id = userVote.id;
+    }
+    const { data, error } = await supabase
+      .from('votes')
+      .upsert([newVote])
+      .select()
+      .single();
+
+    if (error) {
+      console.log(error);
+      Alert.alert('Failed to vote');
+    } else {
+      setUserVote(data);
+      Alert.alert('Thank you for your vote');
+    }
   };
+
+  if (!poll) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <View style={styles.container}>
