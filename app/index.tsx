@@ -3,7 +3,11 @@ import { Poll } from '@/types/db';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Link, router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import PollCard from '../lib/PollCard';
+import { colors, spacing } from '../lib/theme';
+
+const headerAccent = '#2563eb'; // blue-600
 
 export default function HomeScreen() {
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -14,7 +18,7 @@ export default function HomeScreen() {
       if (error) {
         Alert.alert('Error fetching polls...');
       }
-      setPolls(data);
+      setPolls((data ?? []) as unknown as Poll[]);
     };
 
     fetchPolls();
@@ -24,34 +28,39 @@ export default function HomeScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Polls',
+          title: '',
+          headerTitle: () => <Text style={styles.headerTitle}>Votify</Text>,
+          headerTitleAlign: 'center',
           headerRight: () => (
             <AntDesign
               onPress={() => router.push('/polls/new')}
               name="plus"
-              size={20}
-              color="gray"
+              size={24}
+              style={{ marginRight: spacing.md }}
             />
           ),
           headerLeft: () => (
             <AntDesign
               onPress={() => router.push('/profile')}
               name="user"
-              size={20}
-              color="gray"
+              size={24}
+              style={{ marginLeft: spacing.md }}
             />
           ),
         }}
       />
-      <FlatList
-        data={polls}
-        contentContainerStyle={styles.container}
-        renderItem={({ item }) => (
-          <Link href={`/polls/${item.id}`} style={styles.pollContainer}>
-            <Text style={styles.pollTitle}>{item.question}</Text>
-          </Link>
-        )}
-      />
+      <View style={styles.container}>
+        <FlatList
+          data={polls}
+          keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={styles.list}
+          renderItem={({ item }) => (
+            <Link href={`/polls/${item.id}`} asChild>
+              <PollCard title={item.question} />
+            </Link>
+          )}
+        />
+      </View>
     </>
   );
 }
@@ -59,16 +68,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    gap: 5,
+    backgroundColor: colors.background,
   },
-  pollContainer: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
+  list: {
+    padding: spacing.md,
+    gap: spacing.sm,
   },
-  pollTitle: {
+  headerTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
-    fontSize: 16,
   },
 });

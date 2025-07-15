@@ -7,12 +7,13 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Button,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import MinimalButton from '../../lib/MinimalButton';
+import { colors, fontSizes, spacing } from '../../lib/theme';
 
 export default function PollDetails() {
   const [poll, setPoll] = useState<Poll>();
@@ -90,37 +91,61 @@ export default function PollDetails() {
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Poll voting' }} />
       <Text style={styles.question}>{poll?.question}</Text>
-      <View style={{ gap: 5 }}>
+      <View style={styles.optionsList}>
         {poll?.options?.map((option, idx) => (
           <Pressable
             onPress={() => setSelected(option)}
-            style={styles.optionConatiner}
+            style={[
+              styles.optionContainer,
+              selected === option && styles.optionSelected,
+            ]}
             key={idx}
           >
             <Feather
               name={option === selected ? 'check-circle' : 'circle'}
-              size={18}
-              color={option === selected ? 'green' : 'gray'}
+              size={20}
+              color={option === selected ? colors.primary : colors.muted}
             />
-            <Text>{option}</Text>
+            <Text style={styles.optionText}>{option}</Text>
           </Pressable>
         ))}
       </View>
-
-      <Button onPress={vote} title="Vote" />
+      <MinimalButton onPress={vote} title="Vote" style={styles.voteButton} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 10, gap: 10 },
-  question: { fontSize: 20, fontWeight: 600 },
-  optionConatiner: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
+  container: { padding: spacing.lg, gap: spacing.lg },
+  question: {
+    fontSize: fontSizes.xl,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.md,
+  },
+  optionsList: {
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  optionContainer: {
+    backgroundColor: colors.card,
+    padding: spacing.md,
+    borderRadius: spacing.md,
     flexDirection: 'row',
-    gap: 10,
     alignItems: 'center',
+    gap: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  optionSelected: {
+    borderColor: colors.primary,
+    backgroundColor: '#eef2ff',
+  },
+  optionText: {
+    fontSize: fontSizes.md,
+    color: colors.text,
+  },
+  voteButton: {
+    marginTop: spacing.lg,
   },
 });

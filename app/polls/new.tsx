@@ -3,7 +3,9 @@ import { useAuth } from '@/providers/AuthProvider';
 import Feather from '@expo/vector-icons/Feather';
 import { Redirect, router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import MinimalButton from '../../lib/MinimalButton';
+import { colors, fontSizes, spacing } from '../../lib/theme';
 
 export default function CreatePoll() {
   const [question, setQuestion] = useState('');
@@ -26,7 +28,7 @@ export default function CreatePoll() {
 
     const { data, error } = await supabase
       .from('polls')
-      .insert([{ question, options: validOptions }])
+      .insert([{ question, options: validOptions }] as any)
       .select();
 
     if (error) {
@@ -44,16 +46,17 @@ export default function CreatePoll() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Create Poll' }} />
-      <Text style={styles.label}>Title</Text>
+      <Text style={styles.label}>Question</Text>
       <TextInput
         value={question}
         onChangeText={setQuestion}
         placeholder="Type your question here..."
         style={styles.input}
+        placeholderTextColor={colors.muted}
       />
-      <Text style={styles.label}>Title</Text>
+      <Text style={styles.label}>Options</Text>
       {options.map((option, index) => (
-        <View key={index} style={{ justifyContent: 'center' }}>
+        <View key={index} style={styles.optionRow}>
           <TextInput
             value={option}
             onChangeText={(text) => {
@@ -62,40 +65,70 @@ export default function CreatePoll() {
               setOptions(updated);
             }}
             placeholder={`Option ${index + 1}`}
-            style={styles.input}
+            style={[styles.input, styles.optionInput]}
+            placeholderTextColor={colors.muted}
           />
           <Feather
             name="x"
             size={18}
-            color="gray"
+            color={colors.muted}
             onPress={() => {
               const updated = [...options];
               updated.splice(index, 1);
               setOptions(updated);
             }}
-            style={{ position: 'absolute', right: 10 }}
+            style={styles.removeIcon}
           />
         </View>
       ))}
-      <Button title="Add Option" onPress={() => setOptions([...options, ''])} />
-      <Button title="Create Poll" onPress={createPoll} />
-      <Text style={{ color: 'crimson' }}>{error}</Text>
+      <MinimalButton
+        title="Add Option"
+        onPress={() => setOptions([...options, ''])}
+      />
+      <MinimalButton title="Create Poll" onPress={createPoll} />
+      {!!error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    gap: 5,
+    padding: spacing.lg,
+    gap: spacing.md,
+    backgroundColor: colors.background,
+    flex: 1,
   },
   label: {
-    fontWeight: '500',
-    marginTop: 10,
+    fontWeight: '600',
+    fontSize: fontSizes.md,
+    color: colors.text,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   input: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: colors.card,
+    padding: spacing.md,
+    borderRadius: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    fontSize: fontSizes.md,
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  removeIcon: {
+    marginLeft: spacing.sm,
+  },
+  error: {
+    color: 'crimson',
+    fontSize: fontSizes.sm,
+    marginTop: spacing.sm,
+  },
+  optionInput: {
+    flex: 1,
   },
 });

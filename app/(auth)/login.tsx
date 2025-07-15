@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/supabase';
-import { Button, Input } from '@rneui/themed';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import MinimalButton from '../../lib/MinimalButton';
+import { colors, fontSizes, spacing } from '../../lib/theme';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -36,40 +37,38 @@ export default function Auth() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input
-          label="Email"
-          leftIcon={{ type: 'font-awesome', name: 'envelope' }}
-          onChangeText={(text) => setEmail(text)}
+    <View style={styles.outer}>
+      <View style={styles.card}>
+        <Text style={styles.heading}>Sign In</Text>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
           value={email}
+          onChangeText={setEmail}
           placeholder="email@address.com"
-          autoCapitalize={'none'}
+          placeholderTextColor={colors.muted}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Input
-          label="Password"
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          onChangeText={(text) => setPassword(text)}
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
           value={password}
-          secureTextEntry={true}
+          onChangeText={setPassword}
           placeholder="Password"
-          autoCapitalize={'none'}
+          placeholderTextColor={colors.muted}
+          autoCapitalize="none"
+          secureTextEntry
         />
-      </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
+        <MinimalButton
           title="Sign in"
-          disabled={loading}
-          onPress={() => signInWithEmail()}
+          onPress={signInWithEmail}
+          style={styles.button}
         />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Button
+        <MinimalButton
           title="Sign up"
-          disabled={loading}
-          onPress={() => signUpWithEmail()}
+          onPress={signUpWithEmail}
+          style={styles.button}
         />
       </View>
     </View>
@@ -77,16 +76,52 @@ export default function Auth() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 40,
-    padding: 12,
+  outer: {
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
   },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: 'stretch',
+  card: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: colors.card,
+    borderRadius: spacing.lg,
+    padding: spacing.xl,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'stretch',
   },
-  mt20: {
-    marginTop: 20,
+  heading: {
+    fontSize: fontSizes.xl,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  label: {
+    fontSize: fontSizes.md,
+    color: colors.text,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+    marginTop: spacing.md,
+  },
+  input: {
+    backgroundColor: colors.background,
+    borderRadius: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    fontSize: fontSizes.md,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  button: {
+    marginTop: spacing.md,
   },
 });
