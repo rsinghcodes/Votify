@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import MinimalAlert from '../../lib/MinimalAlert';
 import MinimalButton from '../../lib/MinimalButton';
 import { colors, fontSizes, spacing } from '../../lib/theme';
 
@@ -8,6 +9,11 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    message: string;
+    type?: 'info' | 'error' | 'success';
+  }>({ visible: false, message: '' });
 
   async function signInWithEmail() {
     setLoading(true);
@@ -16,7 +22,8 @@ export default function Auth() {
       password: password,
     });
 
-    if (error) Alert.alert(error.message);
+    if (error)
+      setAlert({ visible: true, message: error.message, type: 'error' });
     setLoading(false);
   }
 
@@ -30,14 +37,25 @@ export default function Auth() {
       password: password,
     });
 
-    if (error) Alert.alert(error.message);
+    if (error)
+      setAlert({ visible: true, message: error.message, type: 'error' });
     else if (!session)
-      Alert.alert('Please check your inbox for email verification!');
+      setAlert({
+        visible: true,
+        message: 'Please check your inbox for email verification!',
+        type: 'info',
+      });
     setLoading(false);
   }
 
   return (
     <View style={styles.outer}>
+      <MinimalAlert
+        visible={alert.visible}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+      />
       <View style={styles.card}>
         <Text style={styles.heading}>Sign In</Text>
         <Text style={styles.label}>Email</Text>

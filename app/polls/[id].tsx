@@ -6,12 +6,12 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import MinimalAlert from '../../lib/MinimalAlert';
 import MinimalButton from '../../lib/MinimalButton';
 import { colors, fontSizes, spacing } from '../../lib/theme';
 
@@ -20,6 +20,11 @@ export default function PollDetails() {
   const [selected, setSelected] = useState('React Native');
   const { id } = useLocalSearchParams<{ id: string }>();
   const [userVote, setUserVote] = useState<Vote>();
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    message: string;
+    type?: 'info' | 'error' | 'success';
+  }>({ visible: false, message: '' });
 
   const { user } = useAuth();
 
@@ -31,9 +36,12 @@ export default function PollDetails() {
         .eq('id', Number.parseInt(id))
         .single();
       if (error) {
-        Alert.alert('Error fetching data');
+        setAlert({
+          visible: true,
+          message: 'Error fetching data',
+          type: 'error',
+        });
       }
-
       setPoll(data);
     };
 
@@ -75,11 +83,14 @@ export default function PollDetails() {
       .single();
 
     if (error) {
-      console.log(error);
-      Alert.alert('Failed to vote');
+      setAlert({ visible: true, message: 'Failed to vote', type: 'error' });
     } else {
       setUserVote(data);
-      Alert.alert('Thank you for your vote');
+      setAlert({
+        visible: true,
+        message: 'Thank you for your vote',
+        type: 'success',
+      });
     }
   };
 
@@ -89,6 +100,12 @@ export default function PollDetails() {
 
   return (
     <View style={styles.container}>
+      <MinimalAlert
+        visible={alert.visible}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+      />
       <Stack.Screen options={{ title: 'Poll voting' }} />
       <Text style={styles.question}>{poll?.question}</Text>
       <View style={styles.optionsList}>
@@ -110,7 +127,7 @@ export default function PollDetails() {
           </Pressable>
         ))}
       </View>
-      <MinimalButton onPress={vote} title="Vote" style={styles.voteButton} />
+      <MinimalButton onPress={vote} title="Vote" />
     </View>
   );
 }
@@ -118,10 +135,9 @@ export default function PollDetails() {
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.lg },
   question: {
-    fontSize: fontSizes.xl,
+    fontSize: fontSizes.lg,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: spacing.md,
   },
   optionsList: {
     gap: spacing.sm,
@@ -144,8 +160,5 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: fontSizes.md,
     color: colors.text,
-  },
-  voteButton: {
-    marginTop: spacing.lg,
   },
 });

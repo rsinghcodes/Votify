@@ -3,7 +3,8 @@ import { useAuth } from '@/providers/AuthProvider';
 import Feather from '@expo/vector-icons/Feather';
 import { Redirect, router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import MinimalAlert from '../../lib/MinimalAlert';
 import MinimalButton from '../../lib/MinimalButton';
 import { colors, fontSizes, spacing } from '../../lib/theme';
 
@@ -11,6 +12,11 @@ export default function CreatePoll() {
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [error, setError] = useState('');
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    message: string;
+    type?: 'info' | 'error' | 'success';
+  }>({ visible: false, message: '' });
 
   const { user } = useAuth();
 
@@ -32,7 +38,11 @@ export default function CreatePoll() {
       .select();
 
     if (error) {
-      Alert.alert('Failed to create the poll');
+      setAlert({
+        visible: true,
+        message: 'Failed to create the poll',
+        type: 'error',
+      });
       return;
     }
 
@@ -45,6 +55,12 @@ export default function CreatePoll() {
 
   return (
     <View style={styles.container}>
+      <MinimalAlert
+        visible={alert.visible}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+      />
       <Stack.Screen options={{ title: 'Create Poll' }} />
       <Text style={styles.label}>Question</Text>
       <TextInput

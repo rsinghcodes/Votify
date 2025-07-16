@@ -3,20 +3,30 @@ import { Poll } from '@/types/db';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Link, router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import MinimalAlert from '../lib/MinimalAlert';
 import PollCard from '../lib/PollCard';
-import { colors, spacing } from '../lib/theme';
+import { spacing } from '../lib/theme';
 
 const headerAccent = '#2563eb'; // blue-600
 
 export default function HomeScreen() {
   const [polls, setPolls] = useState<Poll[]>([]);
+  const [alert, setAlert] = useState<{
+    visible: boolean;
+    message: string;
+    type?: 'info' | 'error' | 'success';
+  }>({ visible: false, message: '' });
 
   useEffect(() => {
     const fetchPolls = async () => {
       let { data, error } = await supabase.from('polls').select('*');
       if (error) {
-        Alert.alert('Error fetching polls...');
+        setAlert({
+          visible: true,
+          message: 'Error fetching polls...',
+          type: 'error',
+        });
       }
       setPolls((data ?? []) as unknown as Poll[]);
     };
@@ -26,6 +36,12 @@ export default function HomeScreen() {
 
   return (
     <>
+      <MinimalAlert
+        visible={alert.visible}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({ ...alert, visible: false })}
+      />
       <Stack.Screen
         options={{
           title: '',
@@ -68,11 +84,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#f6f8fa',
   },
   list: {
-    padding: spacing.md,
-    gap: spacing.sm,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
   headerTitle: {
     fontSize: 24,
