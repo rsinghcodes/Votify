@@ -1,18 +1,14 @@
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
 import { Poll, Vote } from '@/types/db';
+import { TablesInsert } from '@/types/supabase';
 import Feather from '@expo/vector-icons/Feather';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import MinimalAlert from '../../lib/MinimalAlert';
 import MinimalButton from '../../lib/MinimalButton';
+import MinimalSpinner from '../../lib/MinimalSpinner';
 import { colors, fontSizes, spacing } from '../../lib/theme';
 
 export default function PollDetails() {
@@ -25,6 +21,10 @@ export default function PollDetails() {
     message: string;
     type?: 'info' | 'error' | 'success';
   }>({ visible: false, message: '' });
+  const [voteCounts, setVoteCounts] = useState<Record<string, number> | null>(
+    null
+  );
+  const [loadingVotes, setLoadingVotes] = useState(false);
 
   const { user } = useAuth();
 
@@ -33,16 +33,18 @@ export default function PollDetails() {
       let { data, error } = await supabase
         .from('polls')
         .select('*')
-        .eq('id', Number.parseInt(id))
+        .eq('id', id as any)
         .single();
-      if (error) {
+      if (error || !data) {
         setAlert({
           visible: true,
           message: 'Error fetching data',
           type: 'error',
         });
+        setPoll(undefined);
+        return;
       }
-      setPoll(data);
+      setPoll(data as unknown as Poll);
     };
 
     const fetchUserVote = async () => {
@@ -52,14 +54,15 @@ export default function PollDetails() {
       let { data, error } = await supabase
         .from('votes')
         .select('*')
-        .eq('poll_id', Number.parseInt(id))
-        .eq('user_id', user.id)
+        .eq('poll_id', id as any)
+        .eq('user_id', user.id as any)
         .limit(1)
         .single();
-
-      setUserVote(data);
-      if (data) {
-        setSelected(data.option);
+      if (data && !error) {
+        setUserVote(data as unknown as Vote);
+        setSelected((data as unknown as Vote).option);
+      } else {
+        setUserVote(undefined);
       }
     };
 
@@ -67,35 +70,68 @@ export default function PollDetails() {
     fetchUserVote();
   }, []);
 
+  const fetchVoteCounts = useCallback(async () => {
+    setLoadingVotes(true);
+    const { data, error } = await supabase
+      .from('votes')
+      .select('option, poll_id');
+    if (!error && data && poll) {
+      const counts: Record<string, number> = {};
+      for (const opt of poll.options) {
+        counts[opt] = data.filter(
+          (v: any) => v.option === opt && v.poll_id === poll.id
+        ).length;
+      }
+      setVoteCounts(counts);
+    }
+    setLoadingVotes(false);
+  }, [poll]);
+
+  // Fetch vote counts on mount
+  useEffect(() => {
+    if (!poll) return;
+    fetchVoteCounts();
+  }, [poll, fetchVoteCounts]);
+
+  const handleOptionPress = (option: string) => {
+    setSelected(option);
+  };
+
   const vote = async () => {
-    const newVote = {
+    const newVote: TablesInsert<'votes'> = {
       option: selected,
-      poll_id: poll?.id,
-      user_id: user?.id,
+      poll_id: poll?.id as number,
+      user_id: user?.id as string,
     };
     if (userVote) {
       newVote.id = userVote.id;
     }
     const { data, error } = await supabase
       .from('votes')
-      .upsert([newVote])
+      .upsert([newVote as any])
       .select()
       .single();
 
-    if (error) {
+    if (error || !data) {
       setAlert({ visible: true, message: 'Failed to vote', type: 'error' });
     } else {
-      setUserVote(data);
+      setUserVote(data as unknown as Vote);
       setAlert({
         visible: true,
         message: 'Thank you for your vote',
         type: 'success',
       });
+      // Refresh vote counts after voting
+      await fetchVoteCounts();
     }
   };
 
   if (!poll) {
-    return <ActivityIndicator />;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <MinimalSpinner />
+      </View>
+    );
   }
 
   return (
@@ -111,7 +147,7 @@ export default function PollDetails() {
       <View style={styles.optionsList}>
         {poll?.options?.map((option, idx) => (
           <Pressable
-            onPress={() => setSelected(option)}
+            onPress={() => handleOptionPress(option)}
             style={[
               styles.optionContainer,
               selected === option && styles.optionSelected,
@@ -124,6 +160,15 @@ export default function PollDetails() {
               color={option === selected ? colors.primary : colors.muted}
             />
             <Text style={styles.optionText}>{option}</Text>
+            {voteCounts && (
+              <Text style={styles.voteCount}>
+                {loadingVotes
+                  ? '...'
+                  : `${voteCounts[option] ?? 0} vote${
+                      (voteCounts[option] ?? 0) !== 1 ? 's' : ''
+                    }`}
+              </Text>
+            )}
           </Pressable>
         ))}
       </View>
@@ -160,5 +205,11 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: fontSizes.md,
     color: colors.text,
+  },
+  voteCount: {
+    marginLeft: spacing.md,
+    fontSize: fontSizes.md,
+    color: colors.primary,
+    fontWeight: '500',
   },
 });

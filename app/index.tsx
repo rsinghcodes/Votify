@@ -20,7 +20,9 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const fetchPolls = async () => {
-      let { data, error } = await supabase.from('polls').select('*');
+      let { data, error } = await supabase
+        .from('polls')
+        .select('*, votes(poll_id)');
       if (error) {
         setAlert({
           visible: true,
@@ -72,7 +74,11 @@ export default function HomeScreen() {
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <Link href={`/polls/${item.id}`} asChild>
-              <PollCard title={item.question} />
+              <PollCard
+                title={item.question}
+                optionCount={item.options?.length || 0}
+                voteCount={Array.isArray(item.votes) ? item.votes.length : 0}
+              />
             </Link>
           )}
         />

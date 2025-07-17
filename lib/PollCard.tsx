@@ -5,21 +5,33 @@ import { colors, fontSizes, spacing } from './theme';
 
 interface PollCardProps {
   title: string;
+  optionCount: number;
+  voteCount: number;
   onPress?: () => void;
   style?: ViewStyle;
 }
 
 const PollCard = React.forwardRef<any, PollCardProps>(
-  ({ title, onPress, style }, ref) => (
+  ({ title, optionCount, voteCount, onPress, style }, ref) => (
     <Pressable
       ref={ref}
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.pressed, style]}
     >
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
-          {title}
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title} numberOfLines={2}>
+            {title}
+          </Text>
+          <View style={styles.metaRow}>
+            <Text style={styles.meta}>
+              {optionCount} option{optionCount !== 1 ? 's' : ''}
+            </Text>
+            <Text style={styles.meta}>
+              · {voteCount} vote{voteCount !== 1 ? 's' : ''}
+            </Text>
+          </View>
+        </View>
         <View style={styles.arrowContainer}>
           <AntDesign name="arrowright" size={18} color={colors.primary} />
         </View>
@@ -63,5 +75,14 @@ const styles = StyleSheet.create({
   pressed: {
     transform: [{ scale: 0.98 }],
     backgroundColor: colors.background,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: 4,
+  },
+  meta: {
+    fontSize: fontSizes.sm,
+    color: colors.muted,
   },
 });
