@@ -1,39 +1,64 @@
-# Welcome to your Votify app 👋
-Simplify voting with speed and security.
+# Votify - Secure Mobile Voting Application
 
-## 🚧 Technology Stack Used
-- **Server Environment** - Node.js
-- **Frontend** - React Native, TypeScript, Expo Router
-- **Backend** - Supabase (PostgreSQL)
+A high-performance mobile voting application designed for speed, security, and simplicity. Votify leverages modern web technologies to provide a reliable voting experience.
+
+## Technical Architecture Overview
+
+### Core Stack Components
+
+| Component        | Technology                          | Purpose                              |
+|------------------|-------------------------------------|--------------------------------------|
+| **Frontend**     | React Native + TypeScript           | Cross-platform mobile UI             |
+| **Routing**      | Expo Router                         | Native navigation management         |
+| **Backend**      | Supabase (PostgreSQL)               | Real-time database & auth services   |
+| **Runtime**      | Node.js v18+                        | Server environment                   |
+
+## Key Features
+
+- **End-to-end encrypted** voting transactions
+- **Real-time results** with Supabase subscriptions
+- **Anonymous voting**, no signup required
 
 ## 🖼️ Screenshots
-<div style="display:flex">
- <img src="https://github.com/user-attachments/assets/e060c1b3-d078-4f71-bf14-478df393c6e5" alt="Home page" width="400"/>
- <img src="https://github.com/user-attachments/assets/afd7e61f-e688-440f-84cf-909c7c0a7201" alt="Poll page" width="400"/>
+<div align="center">
+ <img width="300" alt="Screenshot_1752689317" src="https://github.com/user-attachments/assets/904c5670-ec2b-478c-ba8d-68c7696d57c2" />
+ <img width="300" alt="Screenshot_1752689193" src="https://github.com/user-attachments/assets/784db468-c817-4455-836f-b8a07dd05b12" />
+ <img width="300" alt="Screenshot_1752689387" src="https://github.com/user-attachments/assets/1205fdc6-04be-486e-81b0-b60281f50c1e" />
+ <img width="300" alt="Screenshot_1752689326" src="https://github.com/user-attachments/assets/492cad3c-05df-4289-b620-cd948a1a582c" />
+ <img width="300" alt="Screenshot_1752689342" src="https://github.com/user-attachments/assets/8e0ef6f5-273f-4ecc-b543-23e51d2da5ca" />
+ <img width="300" alt="Screenshot_1752689320" src="https://github.com/user-attachments/assets/e3153a0a-5d25-4da2-bd8d-aed9254e9ba2" />
 </div>
 
-<div style="display:flex">
- <img src="https://github.com/user-attachments/assets/b0eac16b-8e82-4398-a8bb-269acf9604e5" alt="Create poll page" width="400"/>
- <img src="https://github.com/user-attachments/assets/681a36c2-4e14-4015-af6d-9112c184b939" alt="Sign/signup page" width="400"/>
-</div>
+## Installation & Setup
 
-## Get started
+### Prerequisites
 
-1. Install dependencies
+- Node.js v18+
+- Expo CLI (global install recommended)
+- Android Studio/Xcode (for emulators)
 
-   ```bash
-   npm install
-   ```
+### Quick Start
 
-2. Start the app
+```bash
+# Clone repository
+git clone https://github.com/rsinghcodes/Votify.git
 
-   ```bash
-    npx expo start
-   ```
+cd Votify
 
-In the output, you'll find options to open the app in a
+# Install dependencies
+npm install
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+# Launch development server
+npx expo start
+```
+
+### Development Options
+Choose your preferred environment:
+
+**Development Build**
+
+```bash
+npx expo run:android
+# or
+npx expo run:ios
+```
